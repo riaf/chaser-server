@@ -9,6 +9,10 @@ export class CHaserServer {
   private surroundingInfoGenerator = new SurroundingInfoGenerator()
   private gameState?: GameState
 
+  // Expose for testing
+  public get testGameLogic() { return this.gameLogic }
+  public set testGameState(state: GameState | undefined) { this.gameState = state }
+
   constructor(connectionHandler: IConnectionHandler, logger?: IGameLogger) {
     this.connectionHandler = connectionHandler
     this.logger = logger
