@@ -46,6 +46,31 @@ H:14,15`;
 			expect(gameState.currentTurn).toBe(1);
 			expect(gameState.isGameOver).toBe(false);
 		});
+
+		it("should create game state from custom size map", () => {
+			const gameLogic = new GameLogic();
+			const smallMapString = `N:SmallMap
+T:50
+S:5,7
+D:0,3,3,3,3,3,0
+D:3,0,0,0,0,0,3
+D:3,0,2,0,2,0,3
+D:3,0,0,0,0,0,3
+D:0,3,3,3,3,3,0
+C:1,1
+H:3,5`;
+
+			const gameState = gameLogic.createGameFromMapString(smallMapString, {
+				minItemCount: 8,
+				requirePointSymmetry: true,
+			});
+
+			expect(gameState.map.name).toBe("SmallMap");
+			expect(gameState.map.width).toBe(7);
+			expect(gameState.map.height).toBe(5);
+			expect(gameState.coolPlayer.position).toEqual({ x: 1, y: 1 });
+			expect(gameState.hotPlayer.position).toEqual({ x: 5, y: 3 });
+		});
 	});
 
 	describe("executeAction - walk", () => {

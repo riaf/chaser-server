@@ -10,13 +10,22 @@ import {
 	PlayerType,
 	type Position,
 } from "../types";
-import { MapManager } from "./MapManager";
+import { MapManager, type MapOptions } from "./MapManager";
 
 export class GameLogic {
 	private mapManager = new MapManager();
 
-	public createGameFromMapString(mapString: string): GameState {
-		const gameMap = this.mapManager.loadMapFromString(mapString);
+	public createGameFromMapString(
+		mapString: string,
+		options?: MapOptions,
+	): GameState {
+		// Default CHaser game requirements: 36+ items, point symmetry
+		const defaultOptions: MapOptions = {
+			minItemCount: 36,
+			requirePointSymmetry: true,
+		};
+		const finalOptions = { ...defaultOptions, ...options };
+		const gameMap = this.mapManager.loadMapFromString(mapString, finalOptions);
 
 		return {
 			map: gameMap,

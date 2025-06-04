@@ -1,7 +1,15 @@
 import { CellType, type GameMap, type Position } from "../types";
 
+export interface MapOptions {
+	minItemCount?: number;
+	requirePointSymmetry?: boolean;
+}
+
 export class MapManager {
-	public loadMapFromString(mapString: string): GameMap {
+	public loadMapFromString(
+		mapString: string,
+		options: MapOptions = {},
+	): GameMap {
 		const lines = mapString.trim().split("\n");
 		let name = "";
 		let maxTurns = 0;
@@ -44,8 +52,9 @@ export class MapManager {
 			}
 		}
 
-		if (height !== 15 || width !== 17) {
-			throw new Error("マップサイズは15x17である必要があります");
+		// Validate that actual map dimensions match declared dimensions
+		if (cells.length !== height || (cells[0] && cells[0].length !== width)) {
+			throw new Error("宣言されたサイズと実際のマップサイズが一致しません");
 		}
 
 		const gameMap: GameMap = {
@@ -58,12 +67,16 @@ export class MapManager {
 			hotStartPosition,
 		};
 
+		// Apply validation options
+		const minItemCount = options.minItemCount ?? 0;
+		const requirePointSymmetry = options.requirePointSymmetry ?? true;
+
 		const itemCount = this.countItems(gameMap);
-		if (itemCount < 36) {
-			throw new Error("アイテム数は36個以上である必要があります");
+		if (itemCount < minItemCount) {
+			throw new Error(`アイテム数は${minItemCount}個以上である必要があります`);
 		}
 
-		if (!this.validatePointSymmetry(cells)) {
+		if (requirePointSymmetry && !this.validatePointSymmetry(cells)) {
 			throw new Error(
 				"アイテムとブロックは中心点対称に配置されている必要があります",
 			);

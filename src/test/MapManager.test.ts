@@ -37,48 +37,78 @@ H:14,15`;
 			expect(gameMap.hotStartPosition).toEqual({ x: 15, y: 14 });
 		});
 
-		it("should validate field size is 15x17", () => {
-			const invalidMapString = `N:TestMap
-T:100
-S:10,10
-D:0,1,2,3,0,1,2,3,0,1
-C:2,2
-H:8,8`;
+		it("should accept any valid map size", () => {
+			const smallMapString = `N:SmallMap
+T:50
+S:5,7
+D:0,3,3,3,3,3,0
+D:3,0,0,0,0,0,3
+D:3,0,2,0,2,0,3
+D:3,0,0,0,0,0,3
+D:0,3,3,3,3,3,0
+C:1,1
+H:5,3`;
 
 			const mapManager = new MapManager();
+			const gameMap = mapManager.loadMapFromString(smallMapString);
 
-			expect(() => {
-				mapManager.loadMapFromString(invalidMapString);
-			}).toThrow("マップサイズは15x17である必要があります");
+			expect(gameMap.width).toBe(7);
+			expect(gameMap.height).toBe(5);
+			expect(gameMap.name).toBe("SmallMap");
 		});
 
-		it("should validate minimum item count (36 items)", () => {
-			const mapString = `N:TestMap
+		it("should validate map dimensions match declared size", () => {
+			const mismatchMapString = `N:TestMap
 T:100
-S:15,17
-D:0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
-D:0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
-D:0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
-D:0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
-D:0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
-D:0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
-D:0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
-D:0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
-D:0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
-D:0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
-D:0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
-D:0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
-D:0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
-D:0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
-D:0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+S:5,5
+D:0,1,2,3,0,1,2,3,0,1
 C:2,2
-H:14,15`;
+H:3,3`;
 
 			const mapManager = new MapManager();
 
 			expect(() => {
-				mapManager.loadMapFromString(mapString);
-			}).toThrow("アイテム数は36個以上である必要があります");
+				mapManager.loadMapFromString(mismatchMapString);
+			}).toThrow("宣言されたサイズと実際のマップサイズが一致しません");
+		});
+
+		it("should validate minimum item count with options", () => {
+			const mapString = `N:TestMap
+T:100
+S:5,5
+D:0,0,0,0,0
+D:0,3,0,3,0
+D:0,0,0,0,0
+D:0,3,0,3,0
+D:0,0,0,0,0
+C:1,1
+H:3,3`;
+
+			const mapManager = new MapManager();
+
+			expect(() => {
+				mapManager.loadMapFromString(mapString, { minItemCount: 10 });
+			}).toThrow("アイテム数は10個以上である必要があります");
+		});
+
+		it("should accept map with sufficient items for custom minimum", () => {
+			const mapString = `N:TestMap
+T:100
+S:5,5
+D:0,3,3,3,0
+D:3,0,0,0,3
+D:3,0,2,0,3
+D:3,0,0,0,3
+D:0,3,3,3,0
+C:1,1
+H:3,3`;
+
+			const mapManager = new MapManager();
+			const gameMap = mapManager.loadMapFromString(mapString, {
+				minItemCount: 8,
+			});
+
+			expect(mapManager.countItems(gameMap)).toBe(12);
 		});
 
 		it("should validate point symmetry of items and blocks", () => {
