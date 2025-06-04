@@ -1,48 +1,70 @@
-import { GameState, Position, PlayerType, CellType } from '../types'
+import { CellType, type GameState, PlayerType, type Position } from "../types";
 
 export class SurroundingInfoGenerator {
-  public generateSurroundingInfo(gameState: GameState, playerType: PlayerType): string {
-    const gameRunning = gameState.isGameOver ? '0' : '1'
-    const player = playerType === PlayerType.COOL ? gameState.coolPlayer : gameState.hotPlayer
-    const surroundingCells = this.getSurroundingCells(gameState, player.position, playerType)
-    
-    return gameRunning + surroundingCells.join('')
-  }
+	public generateSurroundingInfo(
+		gameState: GameState,
+		playerType: PlayerType,
+	): string {
+		const gameRunning = gameState.isGameOver ? "0" : "1";
+		const player =
+			playerType === PlayerType.COOL
+				? gameState.coolPlayer
+				: gameState.hotPlayer;
+		const surroundingCells = this.getSurroundingCells(
+			gameState,
+			player.position,
+			playerType,
+		);
 
-  public getSurroundingCells(gameState: GameState, position: Position, playerType: PlayerType): number[] {
-    const { x, y } = position
-    const cells: number[] = []
-    const opponent = playerType === PlayerType.COOL ? gameState.hotPlayer : gameState.coolPlayer
+		return gameRunning + surroundingCells.join("");
+	}
 
-    // 3x3グリッドを左上から右下の順で処理（中央の自分の位置は除外）
-    for (let dy = -1; dy <= 1; dy++) {
-      for (let dx = -1; dx <= 1; dx++) {
-        if (dx === 0 && dy === 0) {
-          // 中央（自分の位置）はスキップ
-          continue
-        }
+	public getSurroundingCells(
+		gameState: GameState,
+		position: Position,
+		playerType: PlayerType,
+	): number[] {
+		const { x, y } = position;
+		const cells: number[] = [];
+		const opponent =
+			playerType === PlayerType.COOL
+				? gameState.hotPlayer
+				: gameState.coolPlayer;
 
-        const checkX = x + dx
-        const checkY = y + dy
+		// 3x3グリッドを左上から右下の順で処理（中央の自分の位置は除外）
+		for (let dy = -1; dy <= 1; dy++) {
+			for (let dx = -1; dx <= 1; dx++) {
+				if (dx === 0 && dy === 0) {
+					// 中央（自分の位置）はスキップ
+					continue;
+				}
 
-        // 範囲外の場合は壁（ブロック）として扱う
-        if (checkX < 0 || checkX >= gameState.map.width || checkY < 0 || checkY >= gameState.map.height) {
-          cells.push(CellType.BLOCK)
-          continue
-        }
+				const checkX = x + dx;
+				const checkY = y + dy;
 
-        // 相手プレイヤーがいるかチェック
-        if (opponent.position.x === checkX && opponent.position.y === checkY) {
-          cells.push(CellType.PLAYER)
-          continue
-        }
+				// 範囲外の場合は壁（ブロック）として扱う
+				if (
+					checkX < 0 ||
+					checkX >= gameState.map.width ||
+					checkY < 0 ||
+					checkY >= gameState.map.height
+				) {
+					cells.push(CellType.BLOCK);
+					continue;
+				}
 
-        // 通常のセル
-        const cellType = gameState.map.cells[checkY][checkX]
-        cells.push(cellType)
-      }
-    }
+				// 相手プレイヤーがいるかチェック
+				if (opponent.position.x === checkX && opponent.position.y === checkY) {
+					cells.push(CellType.PLAYER);
+					continue;
+				}
 
-    return cells
-  }
+				// 通常のセル
+				const cellType = gameState.map.cells[checkY][checkX];
+				cells.push(cellType);
+			}
+		}
+
+		return cells;
+	}
 }
